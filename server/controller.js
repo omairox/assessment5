@@ -36,10 +36,10 @@ module.exports = {
 
     getCities: (req,res) => {
         sequelize.query(`
-        select c.name as city, c.rating, con.name as country
+        select c.city_id, c.name as city, c.rating, con.name as country, con.country_id
         from cities c
         join countries con
-        on c.city_id = con.country_id
+        on c.country_id = con.country_id
         `)
         .then(dbRes => {
             res.status(200).send(dbRes[0])
