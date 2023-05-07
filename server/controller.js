@@ -14,6 +14,49 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
 
 
 module.exports = {
+
+    getCountries: (req,res) => {
+        sequelize.query(`
+        select * from countries
+        `).then(dbRes => {
+            res.status(200).send(dbRes[0])
+        }).catch(err => console.log('error seeding DB', err))
+    },
+
+    createCity: (req,res) => {
+        const {name,rating,countryId} = req.body;
+
+        sequelize.query(`
+        insert into cities (name,rating,country_id)
+        values ('${name}','${rating}','${countryId}')
+        `).then(dbRes => {
+            res.status(200).send(dbRes[0])
+        })
+    },
+
+    getCities: (req,res) => {
+        sequelize.query(`
+        select c.name as city, c.rating, con.name as country
+        from cities c
+        join countries con
+        on c.city_id = con.country_id
+        `)
+        .then(dbRes => {
+            res.status(200).send(dbRes[0])
+        }).catch(err => console.log('error seeding DB', err))
+    },
+
+    deleteCity: (req,res) => {
+        const {id} = req.params
+        sequelize.query(`
+        delete from cities where city_id = '${id}'
+        `)
+        .then(dbRes => {
+            res.status(200).send(dbRes[0])
+        }).catch(err => console.log('error seeding DB', err))
+
+    },
+
     seed: (req, res) => {
         sequelize.query(`
             drop table if exists cities;
@@ -28,8 +71,8 @@ module.exports = {
                 city_id serial primary key,
                 name varchar,
                 rating integer,
-                country_id integer
-            )
+                country_id integer references countries (country_id)
+            );
 
             insert into countries (name)
             values ('Afghanistan'),
@@ -232,4 +275,5 @@ module.exports = {
             res.sendStatus(200)
         }).catch(err => console.log('error seeding DB', err))
     }
+
 }
